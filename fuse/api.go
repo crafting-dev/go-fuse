@@ -329,6 +329,9 @@ type MountOptions struct {
 	// directory queries (i.e. 'ls' without '-l') can be faster with
 	// ReadDir, as no per-file stat calls are needed
 	DisableReadDirPlus bool
+
+	// If not nil, use this function to mount fuse. Return the fuse file descriptor.
+	MountFunc func(mp string) (int, error)
 }
 
 // RawFileSystem is an interface close to the FUSE wire protocol.

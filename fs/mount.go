@@ -24,7 +24,7 @@ func Mount(dir string, root InodeEmbedder, options *Options) (*fuse.Server, erro
 	}
 
 	rawFS := NewNodeFS(root, options)
-	server, err := fuse.NewServer(rawFS, dir, nil, &options.MountOptions)
+	server, err := fuse.NewServer(rawFS, dir, &options.MountOptions)
 	if err != nil {
 		return nil, err
 	}

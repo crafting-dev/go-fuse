@@ -160,7 +160,7 @@ func (ms *Server) Unmount() (err error) {
 //
 // See the "Mount styles" section in the package documentation if you want to
 // know about the inner workings of the mount process. Usually you do not.
-func NewServer(fs RawFileSystem, mountPoint string, mountFunc func(mp string) (int, error), opts *MountOptions) (*Server, error) {
+func NewServer(fs RawFileSystem, mountPoint string, opts *MountOptions) (*Server, error) {
 	if opts == nil {
 		opts = &MountOptions{
 			MaxBackground: _DEFAULT_BACKGROUND_TASKS,
@@ -228,8 +228,8 @@ func NewServer(fs RawFileSystem, mountPoint string, mountFunc func(mp string) (i
 	}
 	var fd int
 	var err error
-	if mountFunc != nil {
-		fd, err = mountFunc(mountPoint)
+	if opts.MountFunc != nil {
+		fd, err = opts.MountFunc(mountPoint)
 	} else {
 		fd, err = mount(mountPoint, &o, ms.ready)
 	}
