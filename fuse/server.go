@@ -226,7 +226,13 @@ func NewServer(fs RawFileSystem, mountPoint string, opts *MountOptions) (*Server
 		}
 		mountPoint = filepath.Clean(filepath.Join(cwd, mountPoint))
 	}
-	fd, err := mount(mountPoint, &o, ms.ready)
+	var fd int
+	var err error
+	if opts.MountFunc != nil {
+		fd, err = opts.MountFunc(mountPoint)
+	} else {
+		fd, err = mount(mountPoint, &o, ms.ready)
+	}
 	if err != nil {
 		return nil, err
 	}
