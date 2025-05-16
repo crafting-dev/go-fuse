@@ -229,7 +229,7 @@ func NewServer(fs RawFileSystem, mountPoint string, opts *MountOptions) (*Server
 	var fd int
 	var err error
 	if opts.MountFunc != nil {
-		fd, err = opts.MountFunc(mountPoint)
+		fd, err = opts.MountFunc(mountPoint, &o, ms.ready)
 	} else {
 		fd, err = mount(mountPoint, &o, ms.ready)
 	}

@@ -331,7 +331,7 @@ type MountOptions struct {
 	DisableReadDirPlus bool
 
 	// If not nil, use this function to mount fuse. Return the fuse file descriptor.
-	MountFunc func(mp string) (int, error)
+	MountFunc func(mp string, options *MountOptions, ready chan<- error) (int, error)
 }
 
 // RawFileSystem is an interface close to the FUSE wire protocol.
