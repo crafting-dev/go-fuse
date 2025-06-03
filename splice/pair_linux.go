@@ -47,6 +47,7 @@ func (p *Pair) discard() error {
 	} else if err != nil {
 		errR := syscall.Close(p.r)
 		errW := syscall.Close(p.w)
+		p.closed = true
 
 		// This can happen if something closed our fd
 		// inadvertently (eg. double close)

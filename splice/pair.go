@@ -12,8 +12,9 @@ import (
 )
 
 type Pair struct {
-	r, w int
-	size int
+	r, w   int
+	size   int
+	closed bool
 }
 
 func (p *Pair) MaxGrow() {
@@ -45,8 +46,12 @@ func (p *Pair) Cap() int {
 }
 
 func (p *Pair) Close() error {
+	if p.closed {
+		return nil
+	}
 	err1 := syscall.Close(p.r)
 	err2 := syscall.Close(p.w)
+	p.closed = true
 	if err1 != nil {
 		return err1
 	}
