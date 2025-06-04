@@ -95,7 +95,12 @@ func (pp *pairPool) get() (p *Pair, err error) {
 }
 
 func (pp *pairPool) done(p *Pair) {
-	p.discard()
+	if err := p.discard(); err != nil {
+		// When discard error, the pipe of the `Pair` may has broken. Drop the `Pair`.
+		pp.drop(p)
+		return
+	}
+
 	pp.Lock()
 	pp.usedCount--
 	pp.unused = append(pp.unused, p)

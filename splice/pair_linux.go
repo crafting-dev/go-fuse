@@ -39,16 +39,19 @@ func (p *Pair) WriteTo(fd uintptr, n int) (int, error) {
 
 const _SPLICE_F_NONBLOCK = 0x2
 
-func (p *Pair) discard() {
+func (p *Pair) discard() error {
 	_, err := syscall.Splice(p.r, nil, devNullFD(), nil, int(p.size), _SPLICE_F_NONBLOCK)
 	if err == syscall.EAGAIN {
 		// all good.
+		return nil
 	} else if err != nil {
-		errR := syscall.Close(p.r)
-		errW := syscall.Close(p.w)
+		closeErr := p.Close()
 
 		// This can happen if something closed our fd
 		// inadvertently (eg. double close)
-		log.Panicf("splicing into /dev/null: %v (close R %d '%v', close W %d '%v')", err, p.r, errR, p.w, errW)
+		err = fmt.Errorf("splicing into /dev/null: %w (close: %v)", err, closeErr)
+		log.Printf("%v\n", err)
 	}
+
+	return err
 }
