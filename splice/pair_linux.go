@@ -45,17 +45,11 @@ func (p *Pair) discard() error {
 		// all good.
 		return nil
 	} else if err != nil {
-		var errR error
-		var errW error
-		if !p.closed {
-			errR = syscall.Close(p.r)
-			errW = syscall.Close(p.w)
-			p.closed = true
-		}
+		closeErr := p.Close()
 
 		// This can happen if something closed our fd
 		// inadvertently (eg. double close)
-		err = fmt.Errorf("splicing into /dev/null: %w (close R %d '%v', close W %d '%v')", err, p.r, errR, p.w, errW)
+		err = fmt.Errorf("splicing into /dev/null: %w (close: %v)", err, closeErr)
 		log.Printf("%v\n", err)
 	}
 
