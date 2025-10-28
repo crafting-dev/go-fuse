@@ -85,6 +85,12 @@ type Server struct {
 	requestProcessingMu sync.Mutex
 }
 
+type InFlightRequest struct {
+	StartTime time.Time
+	OpCode    uint32
+	Filenames []string
+}
+
 // SetDebug is deprecated. Use MountOptions.Debug instead.
 func (ms *Server) SetDebug(dbg bool) {
 	// This will typically trigger the race detector.
@@ -996,6 +1002,28 @@ func (ms *Server) WaitMount() error {
 		return nil
 	}
 	return pollHack(ms.mountPoint)
+}
+
+func (ms *Server) InFlightRequests(f func(req *InFlightRequest)) {
+	ms.reqMu.Lock()
+	defer ms.reqMu.Unlock()
+
+	for _, req := range ms.reqInflight {
+		inHeader := req.inHeader
+		if inHeader == nil {
+			continue
+		}
+
+		startTime := req.startTime
+		if time.Since(startTime) < time.Minute {
+			continue
+		}
+		f(&InFlightRequest{
+			OpCode:    inHeader.Opcode,
+			StartTime: startTime,
+			Filenames: req.filenames,
+		})
+	}
 }
 
 // parseFuseFd checks if `mountPoint` is the special form /dev/fd/N (with N >= 0),
