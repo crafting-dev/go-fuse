@@ -86,9 +86,10 @@ type Server struct {
 }
 
 type InFlightRequest struct {
-	StartTime time.Time
-	OpCode    uint32
-	Filenames []string
+	StartTime  time.Time
+	OpCode     uint32
+	OpCodeName string
+	Filenames  []string
 }
 
 // SetDebug is deprecated. Use MountOptions.Debug instead.
@@ -356,9 +357,8 @@ func (ms *Server) readRequest(exitIdle bool) (req *request, code Status) {
 		return nil, code
 	}
 
-	if ms.latencies != nil {
-		req.startTime = time.Now()
-	}
+	// Always record the start time.
+	req.startTime = time.Now()
 	gobbled := req.setInput(dest[:n])
 
 	ms.reqMu.Lock()
@@ -1014,14 +1014,11 @@ func (ms *Server) InFlightRequests(f func(req *InFlightRequest)) {
 			continue
 		}
 
-		startTime := req.startTime
-		if time.Since(startTime) < time.Minute {
-			continue
-		}
 		f(&InFlightRequest{
-			OpCode:    inHeader.Opcode,
-			StartTime: startTime,
-			Filenames: req.filenames,
+			OpCode:     inHeader.Opcode,
+			OpCodeName: operationName(inHeader.Opcode),
+			StartTime:  req.startTime,
+			Filenames:  req.filenames,
 		})
 	}
 }
